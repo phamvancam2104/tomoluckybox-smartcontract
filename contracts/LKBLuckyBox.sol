@@ -1,6 +1,7 @@
-pragma solidity ^0.5.0;
+pragma solidity ^0.4.24;
+import "./TRC21.sol";
 
-contract TomoLuckyBox {
+contract LKBLuckyBox is LKBTRC21 {
   uint constant LUCKY_BOX_1 = 1000;
   uint constant LUCKY_BOX_2 = 2000;
   uint constant LUCKY_BOX_3 = 3000;
@@ -12,10 +13,12 @@ contract TomoLuckyBox {
 
   event LogRandomLuckyBoxSuccessed(address indexed _addressSender, uint _valueReturn, uint _idLuckyBoxReturn,uint _amountPrize);
 
-  function randomLuckyBox(uint idBoxSender)
-    external
-    payable
+  function randomLuckyBox(uint idBoxSender, uint betAmount)
+  external
   {
+    //transfer tokens to the contract
+    transfer(address(this), betAmount);
+
     uint randomNumber = random();
     uint idLuckyBox = 0;
     if(randomNumber >= 1 && randomNumber <= 3)
@@ -26,7 +29,7 @@ contract TomoLuckyBox {
       else
         idLuckyBox = LUCKY_BOX_3;
     if(idLuckyBox == idBoxSender) {
-      uint amountPrize = msg.value * 3;
+      uint amountPrize = betAmount * 3;
       sendPayment(msg.sender, amountPrize);
       emit LogRandomLuckyBoxSuccessed(msg.sender, RESULT_WIN, idLuckyBox, amountPrize);
     }
@@ -44,8 +47,7 @@ contract TomoLuckyBox {
     return randomNumber;
   }
 
-  function sendPayment(address payable _receiverAdress, uint _amount) private {
-      _receiverAdress.transfer(_amount);
+  function sendPayment(address _receiverAdress, uint _amount) private {
+    _transfer(address(this), _receiverAdress, _amount);
   }
-
 }
